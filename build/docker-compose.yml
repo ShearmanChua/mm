@@ -5,19 +5,19 @@ volumes:
 
 secrets:
   elasticsearch.keystore:
-    file: ../doc_db/elastdocker/secrets/keystore/elasticsearch.keystore
+    file: ../elastdocker/secrets/keystore/elasticsearch.keystore
   elasticsearch.service_tokens:
-    file: ../doc_db/elastdocker/secrets/service_tokens
+    file: ../elastdocker/secrets/service_tokens
   elastic.ca:
-    file: ../doc_db/elastdocker/secrets/certs/ca/ca.crt
+    file: ../elastdocker/secrets/certs/ca/ca.crt
   elasticsearch.certificate:
-    file: ../doc_db/elastdocker/secrets/certs/elasticsearch/elasticsearch.crt
+    file: ../elastdocker/secrets/certs/elasticsearch/elasticsearch.crt
   elasticsearch.key:
-    file: ../doc_db/elastdocker/secrets/certs/elasticsearch/elasticsearch.key
+    file: ../elastdocker/secrets/certs/elasticsearch/elasticsearch.key
   kibana.certificate:
-    file: ../doc_db/elastdocker/secrets/certs/kibana/kibana.crt
+    file: ../elastdocker/secrets/certs/kibana/kibana.crt
   kibana.key:
-    file: ../doc_db/elastdocker/secrets/certs/kibana/kibana.key
+    file: ../elastdocker/secrets/certs/kibana/kibana.key
 
 services:
   elasticsearch:
@@ -36,8 +36,8 @@ services:
       bootstrap.memory_lock: "true"
     volumes:
       - elasticsearch-data:/usr/share/elasticsearch/data
-      - ../doc_db/elastdocker/elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
-      - ../doc_db/elastdocker/elasticsearch/config/log4j2.properties:/usr/share/elasticsearch/config/log4j2.properties
+      - ../elastdocker/elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+      - ../elastdocker/elasticsearch/config/log4j2.properties:/usr/share/elasticsearch/config/log4j2.properties
     secrets:
       - source: elasticsearch.keystore
         target: /usr/share/elasticsearch/config/elasticsearch.keystore
@@ -71,6 +71,8 @@ services:
     build: ../gateway
     stdin_open: true
     tty: true
+    env_file:
+      - .env
     volumes:
       - ../src:/src
       - ../data:/data
@@ -81,13 +83,13 @@ services:
     image: elastdocker/kibana:${ELK_VERSION}
     restart: unless-stopped
     volumes:
-      - ../doc_db/elastdocker/kibana/config/:/usr/share/kibana/config:ro
+      - ../elastdocker/kibana/config/:/usr/share/kibana/config:ro
     environment:
       ELASTIC_USERNAME: ${ELASTIC_USERNAME}
       ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
       ELASTICSEARCH_HOST_PORT: https://${ELASTICSEARCH_HOST}:${ELASTICSEARCH_C_PORT}
     env_file:
-      - ../doc_db/elastdocker/secrets/.env.kibana.token
+      - ../elastdocker/secrets/.env.kibana.token
     secrets:
       - source: elastic.ca
         target: /certs/ca.crt
