@@ -74,7 +74,7 @@ services:
     env_file:
       - .env
     volumes:
-      - ../src:/src
+      - ../gateway/src:/src
       - ../data:/data
     ports:
       - 8888:8888

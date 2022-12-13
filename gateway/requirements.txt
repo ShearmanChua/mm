@@ -1,3 +1,4 @@
+elasticsearch==8.5.3
 notebook==6.5.2
 numpy==1.23.5
 pyyaml==6.0
