@@ -27,7 +27,7 @@ class VectorManager:
         uuid = query_result['data']['Get'][collection_name][0]['_additional']['id']
         return uuid
     
-    def _exists(self, id_no:str) -> bool:
+    def _exists(self, collection_name: str, id_no: str) -> bool:
         where_filter = {
             'operator': 'Equal',
             'valueText': id_no,
@@ -53,7 +53,7 @@ class VectorManager:
             
     def delete_document(self, collection_name: str, id_no: str) -> None:
         # Check if the id exist
-        id_exists = self._exists(id_no)
+        id_exists = self._exists(collection_name, id_no)
         
         if not id_exists:
             print("This id does not exist so no deletion is done")
@@ -138,7 +138,7 @@ class VectorManager:
             return
 
         # Check if the id exist
-        id_exists = self._exists(id_no)
+        id_exists = self._exists(collection_name, id_no)
         
         if id_exists:
             print("This id already existed please use update instead")
@@ -194,7 +194,7 @@ class VectorManager:
         if not document.get('id_no'):
             print('Lack of id_no result in ambiguous document to update')
             return
-        if not self._exists(document['id_no']):
+        if not self._exists(collection_name, document['id_no']):
             print('Attempt to update a non-existent document. No update is done')
             return
         uuid = self._id2uuid(collection_name, document['id_no'])
