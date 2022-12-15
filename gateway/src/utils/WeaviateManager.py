@@ -129,13 +129,13 @@ class VectorManager:
         RETURNS: 
         ------------------------------------
         dict:               Dictionary with the success code 200 or errors
-                            example: {'response':"200"}
+                            example: {'response': "200"}
         """
         try:
             self._client.schema.delete_class(collection_name)
         except Exception as e:
             return {'response':f"{e}"}
-        return {'response':"200"}
+        return {'response': "200"}
             
     def delete_document(self, collection_name: str, id_no: str) -> dict:
         """
@@ -151,13 +151,13 @@ class VectorManager:
         RETURNS: 
         ------------------------------------
         dict:               Dictionary with the success code 200 or errors
-                            example: {'response':"200"}
+                            example: {'response': "200"}
         """
         uuid = self._id2uuid(collection_name, id_no)
         if 'uuid' in uuid:
             try:
                 self._client.data_object.delete(uuid = uuid['uuid'], class_name=collection_name)
-                return {'response':"200"}
+                return {'response': "200"}
             except Exception as e:
                 return {'response': f"Unknown error with error message -> {e}"}
         return {'response': uuid['errors']}
@@ -165,7 +165,7 @@ class VectorManager:
 
     def create_collection(self, collection_name: str, schema: dict) -> dict:
         """
-        create a collection of documents
+        Create a collection of documents
 
         INPUT: 
         ------------------------------------
@@ -179,7 +179,7 @@ class VectorManager:
         RETURNS: 
         ------------------------------------
         dict:               Dictionary with the success code 200 or errors
-                            example: {'response':"200"}
+                            example: {'response': "200"}
         """
         if not schema.get('id_no'):
             return {'response': 'Lack of id_no as an attribute in property'}
@@ -195,11 +195,11 @@ class VectorManager:
             self._client.schema.create_class(document_schema)
         except Exception as e:
             return {'response': f"Unknown error with error message -> {e}"}
-        return {'response':"200"}
+        return {'response': "200"}
 
     def create_document(self, collection_name: str, properties: dict, embedding: torch.Tensor) -> dict:
         """
-        create a document in a specified collecton
+        Create a document in a specified collection
 
         INPUT: 
         ------------------------------------
@@ -217,7 +217,7 @@ class VectorManager:
         RETURNS: 
         ------------------------------------
         dict:               Dictionary with the success code 200 or errors
-                            example: {'response':"200"}
+                            example: {'response': "200"}
         """
         # Check if the id_no attribute exist
         if not properties.get('id_no'):
@@ -225,7 +225,7 @@ class VectorManager:
         # Check if the id exist
         id_exists = self._exists(collection_name, properties['id_no'])
         if id_exists:
-            return {'response': 'This id already existed please use update instead'}
+            return {'response': 'This id already existed, please use update instead'}
         # Create document
         try:
             self._client.data_object.create(
@@ -233,17 +233,17 @@ class VectorManager:
               collection_name,
               vector = embedding
             )
-            return {'response':"200"}
+            return {'response': "200"}
         except Exception as e:
             if "vector lengths don't match"in str(e):
                 self.delete_document(collection_name, properties['id_no'])
-                return {'response':"Mistmatch vector length, creation failed"}
+                return {'response':"Mismatch vector length, creation failed"}
             else:
                 return {'response': f"{e}"}
 
     def read_document(self, collection_name: str, id_no: str) -> dict:
         """
-        Return a matching document in a specified collecton
+        Return a matching document in a specified collection
 
         INPUT: 
         ------------------------------------
@@ -255,7 +255,7 @@ class VectorManager:
         RETURNS: 
         ------------------------------------
         dict:               Dictionary with the success code 200 or errors
-                            example: {'response':"200"}
+                            example: {'response': "200"}
         """
         if not self._exists(collection_name, id_no):
             return {'response': 'Attempt to read a non-existent document. No reading is done'}
@@ -267,13 +267,13 @@ class VectorManager:
     
     def get_top_k(self, collection_name: str, target_embedding: Union[list, numpy.ndarray, torch.Tensor], top_k: int = 1) -> dict:
         """
-        Return dictionary with the response key holding the list of near documents
+        Return the dictionary with the response key holding the list of near documents
 
         INPUT: 
         ------------------------------------
         collection_name:    Name of collection
                             example shape:  'Faces'
-        target_embedding:   Query embedding to fine document with high cosine similarity
+        target_embedding:   Query embedding to find document with high cosine similarity
                             example: torch.Tensor([0.5766745, 0.9341823, 0.7021697, 0.54776406, 0.013553977])
         top_k:              integer value for the number of documents to return. Default is 1
                             example: 3
@@ -313,13 +313,13 @@ class VectorManager:
 
     def update_document(self, collection_name: str, document: dict) -> dict:
         """
-        Update a document in a specified collecton
+        Update a document in a specified collection
 
         INPUT: 
         ------------------------------------
         collection_name:    Name of collection
                             example shape:  'Faces'
-        document:           dctionary format of the update document
+        document:           dictionary format of the updated document
                             {
                                 'id_no': '4848272',
                                 'vector': torch.Tensor([[
@@ -331,10 +331,10 @@ class VectorManager:
         RETURNS: 
         ------------------------------------
         dict:               Dictionary with the success code 200 or errors
-                            example: {'response':"200"}
+                            example: {'response': "200"}
         """
         if not document.get('id_no'):
-            return {'response': 'Lack of id_no result in ambiguous document to update'}
+            return {'response': 'Lack of id_no result in an ambiguous document to update'}
         if len(document.keys()) == 1:
             return {'response': f'Only {document.keys()} is found which insufficient to update'}
         uuid = self._id2uuid(collection_name, document['id_no'])
@@ -352,12 +352,12 @@ class VectorManager:
                         uuid = uuid['uuid'],
                         vector = new_vector
                     )
-                    return {'response':"200"}
+                    return {'response': "200"}
                 except Exception as e:
                     if "vector lengths don't match"in str(e):
                         document['vector'] = previous_vector
                         self.update_document(collection_name, document)
-                        return {'response': "Mistmatch vector length, updating failed"}
+                        return {'response': "Mismatch vector length, updating failed"}
                     else:
                         return {'response': f'{e}'}
             else:
@@ -368,7 +368,7 @@ class VectorManager:
                         class_name = collection_name, 
                         uuid = uuid['uuid'],
                     )
-                    return {'response':"200"}
+                    return {'response': "200"}
                 except Exception as e:
                     return {'response': f'{e}'}
         return {'response': uuid['errors']}
