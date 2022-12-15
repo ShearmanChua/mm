@@ -2,9 +2,8 @@ import weaviate
 import torch
 import os
 import copy
-import pprint
-import json
-import base64
+from typing import Union
+import numpy
 
 class VectorManager:
     TYPE_MAP = {
@@ -67,6 +66,8 @@ class VectorManager:
             'path': ['id_no']
         }
         response = self._client.query.get(collection_name, ["id_no", "_additional {id}"]).with_where(where_filter).do()
+        if response.get('errors'):
+            return False
         if len(response['data']['Get'][collection_name]) > 1:
             print("There exist duplicated files")
             return True
@@ -96,7 +97,6 @@ class VectorManager:
         
         try:
             self._client.data_object.delete(uuid=uuid, class_name=collection_name)
-            print('Successfully deleted')
         except Exception as e:
             print(f"Unknown error with error message -> {e}")
 
@@ -170,7 +170,7 @@ class VectorManager:
             return
 
         # Check if the id exist
-        id_exists = self._exists(collection_name, id_no)
+        id_exists = self._exists(collection_name, properties['id_no'])
         
         if id_exists:
             print("This id already existed please use update instead")
@@ -184,7 +184,11 @@ class VectorManager:
               vector = embedding
             )
         except Exception as e:
-            print(f'Error in creating. Please read error message -> {e}')
+            if "vector lengths don't match"in str(e):
+                print("Mistmatch vector length, creation failed")
+                self.delete_document(collection_name, properties['id_no'])
+            else:
+                print(f'Error in creating. Please read error message -> {e}')
 
     def read_document(self, collection_name: str, id_no: str) -> dict:
         """
@@ -208,6 +212,28 @@ class VectorManager:
         uuid = self._id2uuid(collection_name, id_no)
         return self._client.data_object.get_by_id(uuid = uuid, class_name = collection_name, with_vector = True)
     
+    def get_top_k(self, collection_name: str, target_embedding: Union[list, numpy.ndarray, torch.Tensor], top_k: int = 1):
+        if top_k < 1:
+            print('Invalid top_k')
+            return
+        query_vector = {'vector': target_embedding}
+        res = self._client.query.get(collection_name, ["id_no", "_additional {certainty, id}"]).with_near_vector(query_vector).do()
+        if 'errors' in res:
+            error_message = res['errors'][0]['message']
+            if "vector lengths don't match" in error_message:
+                print('Query with wrong embedding dimension')
+            else:
+                print(f'unknown error please read -> {error_message}')
+            return
+        try:
+            limit = min(top_k, len(res['data']['Get'][collection_name]))
+            top_id = res['data']['Get'][collection_name][:limit]
+            top_results = [ self.read_document(collection_name, document['id_no']) for document in top_id]
+            for document, res in zip(top_id, top_results):
+                res['certainty'] = document['_additional']['certainty']
+            return top_results
+        except Exception as e:
+            print(f"Unknown error with error message -> {e}")
 
     def update_document(self, collection_name: str, document: dict) -> None:
         """
@@ -242,28 +268,25 @@ class VectorManager:
         temp = copy.deepcopy(document)
         if 'vector' in document.keys():
             new_vector = temp['vector']
-            if len(document.keys()) == 2:
+            del temp['id_no']
+            del temp['vector']
+            previous_vector = self._client.data_object.get_by_id(uuid = uuid, class_name = collection_name, with_vector = True)['vector']
+            try:
                 self._client.data_object.update(
-                    data_object = {}, 
+                    data_object = temp, 
                     class_name = collection_name, 
                     uuid = uuid, 
                     vector = new_vector
                 )
-            else:
-                del temp['id_no']
-                del temp['vector']
-                try:
-                    self._client.data_object.update(
-                        data_object = temp, 
-                        class_name = collection_name, 
-                        uuid = uuid, 
-                        vector = new_vector
-                    )
-                except Exception as e:
-                    if '400' in str(e):
-                        print("Unknown field(s) in document")
-                    else:
-                        print(f"Unknown error with error message -> {e}")
+            except Exception as e:
+                if '400' in str(e):
+                    print("Unknown field(s) in document")
+                elif "vector lengths don't match"in str(e):
+                    print("Mistmatch vector length, updating failed")
+                    document['vector'] = previous_vector
+                    self.update_document(collection_name, document)
+                else:
+                    print(f"Unknown error with error message -> {e}")
         else:
             del temp['id_no']
             try:
@@ -274,7 +297,7 @@ class VectorManager:
                 )
             except Exception as e:
                 if '400' in str(e):
-                    print("Unknown field(s) in document")
+                    print(f"Error in document field(s) -> {e}")
                 else:
                     print(f"Unknown error with error message -> {e}")
                     
