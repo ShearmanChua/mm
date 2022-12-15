@@ -1,3 +1,4 @@
+import collections
 import os
 from typing import Optional, List, Dict
 
@@ -23,7 +24,6 @@ TYPE_MAP =  {
 MAX_BULK_SIZE=10000
 
 class DocMgr():
-    
     
     def __init__(self):
         self.url = f"https://{os.environ.get('ELASTICSEARCH_HOST')}:{os.environ.get('ELASTICSEARCH_C_PORT')}"
@@ -96,6 +96,18 @@ class DocMgr():
         self.consolidated_actions=[] # Reset List
         return list_of_es_ids
         
+    def _flatten(self, d, parent_key='', sep='.'):
+        """
+        Flatten nested dictionary keys to dotted parameters because Elasticsearch. 
+        """
+        items = []
+        for k, v in d.items():
+            new_key = parent_key + sep + k if parent_key else k
+            if isinstance(v, collections.MutableMapping):
+                items.extend(flatten(v, new_key, sep=sep).items())
+            else:
+                items.append((new_key, v))
+        return dict(items)
     
     def create_collection(self, collection_name: str, schema: Dict) -> Dict:
         """
@@ -304,7 +316,8 @@ class DocMgr():
         if not self._check_data_type(field_value_dict, dict):
             return {"response":"Type of 'field_value_dict' is not dict"}
         
-        # Check for document's existence     
+        # Check for document's existence
+        field_value_dict = self._flatten(field_value_dict)
         search_result = self.client.search(index=collection_name, query={"match":field_value_dict})
         result_count = search_result['hits']['total']['value']
         
@@ -332,7 +345,7 @@ class DocMgr():
         if not self._check_data_type(query, dict):
             return {"response":"Type of 'field_value_dict' is not dict"}
         
-        # Check for document's existence     
+        # Check for document's existence
         search_result = self.client.search(index=collection_name, query=query)
         result_count = search_result['hits']['total']['value']
         
@@ -342,3 +355,19 @@ class DocMgr():
         docs = search_result['hits']['hits']
         
         return {"response":"200", "api_resp": docs}
+    
+    def get_all_documents(self, collection_name: str) -> dict:
+        """
+        Generator method to retrieve 
+
+        Args:
+            collection_name (str): Index name of ES
+            
+        Returns:
+            Generator Object: Iterable object containing all documents within index specified. 
+        """
+        if not self._check_data_type(collection_name, str):
+            return {"response":"Type of 'collection_name' is not str"}
+        docs_response = scan(self.client, index=collection_name, query={"query":{"match_all":{}}})
+        for item in docs_response:
+            yield item
