@@ -23,7 +23,7 @@ TYPE_MAP =  {
 
 MAX_BULK_SIZE=10000
 
-class DocMgr():
+class DocManager():
     
     def __init__(self):
         self.url = f"https://{os.environ.get('ELASTICSEARCH_HOST')}:{os.environ.get('ELASTICSEARCH_C_PORT')}"

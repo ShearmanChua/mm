@@ -1,6 +1,50 @@
-# template_ir
- 
-### Setup
+# IR Gateway
+ The gateway serves as the primary point of communication with various databases, but each database has its own unique conventions and structures.
+
+We will utilize the [wrapper design pattern](https://en.wikipedia.org/wiki/Adapter_pattern) to enable the use of a single, consistent interface to access several types of databases while encapsulating and abstracting away the complex interaction with each database. This makes switching between interfaces simple and eliminates the need to focus on the specific of each database.
+
+Every data entry through the gateway is termed a **document**. Collectively, these documents are known as a **collection**. This is the convention we follow for our gateway and the wrapper with change the information to map to the respective items in the database. The relationship is demonstrated below:
+
+```mermaid
+graph LR;
+    subgraph B[Collection]
+    A[Documents]
+    end
+    subgraph I[Class]
+    J[Objects]
+    end
+    subgraph K[Index]
+    L[Documents]
+    end
+    C[VectorManager]
+    D[DocManager]
+    G[Weaviate]
+    H[ElasticSearch]
+    B-->C-->I-->G
+    B-->D-->K-->H
+    subgraph Wrapper
+    C
+    D
+    end
+```
+
+## Key Terminologies:
+|    **Term**    	| **ElasticSearch<br>Equivalent** 	| **Weaviate<br>Equivalent** 	|
+|:--------------:	|:-------------------------------:	|:--------------------------:	|
+| **Collection** 	|              Index              	|            Class           	|
+|  **Document**  	|             Document            	|           Object           	|
+|                	|                                 	|                            	|
+
+
+# Supported Frameworks
+The following framework has their wrapper written for. Subsequent frameworks may refer to the existing wrapper. 
+### Document Database:
+- Elasticsearch
+### Vector Database:
+- Weaviate
+
+# Setup
+Setting up ElastDocker
 ```
 git submodule init
 git submodule update
@@ -10,39 +54,26 @@ sysctl -w vm.max_map_count=262144
 make elk
 ```
 
-# Gateway database managers
-The gateway serves as the primary point of communication with various databases, but each database has its own unique conventions and structures.
-
-We will utilize the [wrapper design pattern](https://en.wikipedia.org/wiki/Adapter_pattern) to enable the use of a single, consistent interface to access several types of databases while encapsulating and abstracting away the complex interaction with each database. This makes switching between interfaces simple and eliminates the need to focus on the specific of each database.
-
-## Glossary
-Every data entry through the gateway is termed a document and multiple documents is called a collection. This is the convention we follow for our gateway and the wrapper with change the information to map to the respective items in the database. The relationship is demonstrated below:
-
-```mermaid
-graph LR;
-    A[document]-->B[VectorManager]
-    A-->H[DocMgr]
-    subgraph Wrapper
-    B-->D[Data object]
-    H-->F[Elastic documet]
-    end
-    D-->E[Weaviate Database]
-    F-->G[Elasticsearch Database]
+[//]: <> (TODO: Find the exec command)
+Start IR Gateway
+```
+cd build
+docker-compose up
+docker exec -it 
 ```
 
-```mermaid
-graph LR;
-    A[collection]-->B[VectorManager]
-    A-->H[DocMgr]
-    subgraph Wrapper
-    B-->D[Class]
-    H-->F[Index]
-    end
-    D-->E[Weaviate Database]
-    F-->G[Elasticsearch Database]
-```
+# Usage
+1) Configure all endpoints inside `build/.env`
 
-How to use each wrapper is covered in depth in the following subsections.
+[//]: <> (TODO: Refer to example.py)
+
+2) 
+```
+from utils.ESManager import DocManager
+from utils.WeaviateManager import VectorManager
+
+DocMgr = 
+```
 
 ### Weaviate Wrapper -> `VectorManager`
 
