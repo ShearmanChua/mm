@@ -1,0 +1,12 @@
+neo4j:
+  uri: bolt://neo4j:7687
+  user: neo4j              
+  pwd: password
+  db: neo4j
+
+data:
+  relations_data_path: ../data/relations.csv
+  entities_data_path: ../data/nodes.csv
+
+graph:
+  relations_dict_path: ../data/relations_dict.json
