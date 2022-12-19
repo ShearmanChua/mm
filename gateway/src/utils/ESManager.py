@@ -236,14 +236,14 @@ class DocManager():
         return {"response":"200", "api_resp": resp}
 
     
-    def update_document(self, collection_name: str, doc_id:str, properties: dict) -> dict:
+    def update_document(self, collection_name: str, doc_id:str, document: dict) -> dict:
         """
         Delete document from index based on the specified document id. 
 
         Args:
             collection_name (str): Index name of ES
             doc_id (str): id of doc to be updated
-            properties (dict): key and values of fields to be updated.
+            document (dict): key and values of fields to be updated.
 
         Returns:
             dict: response of error along with the faulty document, or code 200 along with elastic API response
@@ -253,8 +253,8 @@ class DocManager():
             return {"response":"Type of 'collection_name' is not str"}
         if not self._check_data_type(doc_id, str):
             return {"response":"Type of 'doc_id' is not str"}
-        if not self._check_data_type(properties, dict):
-            return {"response":"Type of 'properties' is not dict"}
+        if not self._check_data_type(document, dict):
+            return {"response":"Type of 'document' is not dict"}
         
         
         # Check for document's existence     
@@ -265,13 +265,13 @@ class DocManager():
             return {"response": f"Document '{doc_id}' not found, create document first"}
         
         try:
-            resp = self.client.update(index=collection_name, id=doc_id, doc=properties)
+            resp = self.client.update(index=collection_name, id=doc_id, doc=document)
         except Exception as e:
             return {"response":f"{e.__class__.__name__}. Document Deletion failed"}
         
         return {"response":"200", "api_resp": resp}
     
-    def read_document(self, collection_name: str, doc_id:str) -> dict:
+    def read_document(self, collection_name: str, doc_id: str) -> dict:
         """
         Read document from index based on the specified document id. 
 
@@ -301,7 +301,7 @@ class DocManager():
     
     def query_collection(self, collection_name: str, field_value_dict:dict) -> dict:
         """
-        Read document from index based on the specified document id. 
+        Read document from index based on the specific key-value dictionary query. 
 
         Args:
             collection_name (str): Index name of ES
@@ -330,7 +330,7 @@ class DocManager():
     
     def custom_query(self, collection_name: str, query:dict) -> dict:
         """
-        Read document from index based on the specified document id. 
+        Read document from index based on custom ES query syntax. 
 
         Args:
             collection_name (str): Index name of ES
@@ -358,7 +358,7 @@ class DocManager():
     
     def get_all_documents(self, collection_name: str) -> dict:
         """
-        Generator method to retrieve 
+        Generator method to retrieve all documents within the index
 
         Args:
             collection_name (str): Index name of ES

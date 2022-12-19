@@ -68,13 +68,13 @@ docker exec -it ir_template_gateway_1 /bin/bash
 [//]: <> (TODO: Refer to example.py)
 
 2) Within your python script, import the wrappers
-```
-from utils.ESManager import DocManager
-from utils.WeaviateManager import VectorManager
+    ```
+    from utils.ESManager import DocManager
+    from utils.WeaviateManager import VectorManager
 
-DocMgr = DocManager()
-VecMgr = VectorManager()
-```
+    DocMgr = DocManager()
+    VecMgr = VectorManager()
+    ```
 
 3) Create a schema for the collection. Below are the following supported data type:
     - `int`
@@ -93,12 +93,14 @@ VecMgr = VectorManager()
     Note:
     - Weaviate ignores `torch.tensor` and `numpy.ndarray` fields because there will be a dedicated parameter for uploading vector
     - Weaviate **DOES NOT** support nested mapping
+    - It is required for Weaviate schema to contain `doc_id` field, which is used for alignment of id across multiple frameworks. The baseline id shall be the one from ElasticSearch. 
 
     Some example of a schema is as shown:
     - Standard schema
     ```
-    user_map = {
+    user_schema = {
         "name":"str",
+        "id_no":"str",
         "age":"int",
         "school":"str",
         "grades":"float"
@@ -106,7 +108,7 @@ VecMgr = VectorManager()
     ```
     - Nested schema (Only supported in ElasticSearch)
     ```
-    user_map = {
+    user_schema = {
         "name": "str",
         "age": "int",
         "education": {
@@ -115,10 +117,64 @@ VecMgr = VectorManager()
             "grades": "float"
             }
         },
-        "face_emb":"torch.tensor"
+        "vector":"torch.tensor"
     }
     ```
-### Weaviate Wrapper -> `VectorManager`
+
+4) Using the above schema, create a collection. The schema is compatible across all wrapped frameworks. 
+    ```
+    DocStore = DocMgr.create_collection(collection_name="personnel", schema=user_schema)
+    VecStore = VecMgr.create_collection(collection_name="personnel", schema=user_schema)
+    ```
+
+# Functions
+
+### Collections
+- ```create_collection(collection_name: str, schema: dict)```
+    - Creates a collection with the collection name and the schema.
+    - **Parameters**:
+        - **collection_name**: Name of the collection
+        - **schema**: A dictionary consisting of all the fields (Note: Schema of Weaviate requires `doc_id` field)
+- ```delete_collection(collection_name: str)```
+    - Deletes the indicated collection
+    - **Parameters**:
+        - **collection_name**: Name of the collection
+
+### Documents
+[//]: <> (TODO: Align and fix create_document for weaviate)
+
+- ```create_document(collection_name: str, documents: List[Dict], id_field: str=None)``` (ElasticSearch)
+<br> ```create_document(collection_name: str, documents: dict, embedding: torch.Tensor)``` (Weaviate)
+    - Creates document within the collection. </br>
+    - **Parameters**:
+        - **collection_name**: Name of the collection
+        - **documents**: Dictionary containing all the fields and its value for the document to be created
+        - **id_field** (ElasticSearch): Specify the field from the documents to use as the internal id value. If no field is indicated, then ElasticSearch's generated id will be used instead. 
+        - **embedding** (Weaviate): Vector associated with the document to be created
+
+- ```delete_document(collection_name: str, doc_id: str)```
+    - Deletes the specific document within collection by its id.
+    - **Parameters**:
+        - **collection_name**: Name of the collection
+        - **doc_id**: id of document to be deleted
+
+- ```read_document(collection_name: str, doc_id: str)```
+    - Look up a specific document by its doc_id
+    - **Parameters**:
+        - **collection_name**: Name of the collection
+        - **doc_id**: id of document of interest
+
+- ```update_document(collection_name: str, doc_id:str, document: dict)```
+    - Update a specific document by its doc_id
+    - **Parameters**:
+        - **collection_name**: Name of the collection
+        - **doc_id**: id of document to be updated
+        - **document**: Dictionary containing the fields and its value for the document to be updated. Only fields found in the dictionary will be updated. 
+
+
+
+
+# Weaviate Wrapper -> `VectorManager`
 
 You can import the `VectorManager` from `WeaviateManager`
 
