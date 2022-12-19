@@ -20,8 +20,8 @@ graph LR;
     D[DocManager]
     G[Weaviate]
     H[ElasticSearch]
-    A-->C-->J-->G
-    A-->D-->L-->H
+    B-->C-->I-->G
+    B-->D-->K-->H
     subgraph Wrapper
     C
     D
@@ -33,7 +33,7 @@ graph LR;
 |:--------------:	|:-------------------------------:	|:--------------------------:	|
 | **Collection** 	|              Index              	|            Class           	|
 |  **Document**  	|             Document            	|           Object           	|
-|                	|                                 	|                            	|
+|  **Schema**     	|              Mapping              |           Schema           	|
 
 
 # Supported Frameworks
@@ -59,7 +59,7 @@ Start IR Gateway
 ```
 cd build
 docker-compose up
-docker exec -it 
+docker exec -it ir_template_gateway_1 /bin/bash
 ```
 
 # Usage
@@ -67,14 +67,57 @@ docker exec -it
 
 [//]: <> (TODO: Refer to example.py)
 
-2) 
+2) Within your python script, import the wrappers
 ```
 from utils.ESManager import DocManager
 from utils.WeaviateManager import VectorManager
 
-DocMgr = 
+DocMgr = DocManager()
+VecMgr = VectorManager()
 ```
 
+3) Create a schema for the collection. Below are the following supported data type:
+    - `int`
+    - `float`
+    - `double`
+    - `str`
+    - `bool`
+    - `datetime`
+    - `list[int]`
+    - `list[str]`
+    - `list[float]`
+    - `list[double]`
+    - `torch.tensor`
+    - `numpy.ndarray`
+
+    Note:
+    - Weaviate ignores `torch.tensor` and `numpy.ndarray` fields because there will be a dedicated parameter for uploading vector
+    - Weaviate **DOES NOT** support nested mapping
+
+    Some example of a schema is as shown:
+    - Standard schema
+    ```
+    user_map = {
+        "name":"str",
+        "age":"int",
+        "school":"str",
+        "grades":"float"
+    }
+    ```
+    - Nested schema (Only supported in ElasticSearch)
+    ```
+    user_map = {
+        "name": "str",
+        "age": "int",
+        "education": {
+            "university": {
+            "school": "str",
+            "grades": "float"
+            }
+        },
+        "face_emb":"torch.tensor"
+    }
+    ```
 ### Weaviate Wrapper -> `VectorManager`
 
 You can import the `VectorManager` from `WeaviateManager`

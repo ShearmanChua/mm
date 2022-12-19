@@ -17,6 +17,8 @@ class VectorManager:
         "list[str]":["text[]"],
         "list[float]": ["number[]"],
         "list[double]": ["number[]"],
+        "torch.tensor": "",
+        "numpy.ndarray": ""
     }
     
     def __init__(self) -> None:
@@ -54,10 +56,11 @@ class VectorManager:
         for k, v in schema.items():
             try:
                 self.TYPE_MAP.get(v)
-                temp.append({
-                    "name": k,
-                    "dataType": self.TYPE_MAP[v]
-                })
+                if v != "":
+                    temp.append({
+                        "name": k,
+                        "dataType": self.TYPE_MAP[v]
+                    })
             except:
                 return []
         return temp
