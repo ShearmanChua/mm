@@ -20,8 +20,8 @@ graph LR;
     D[DocManager]
     G[Weaviate]
     H[ElasticSearch]
-    B-->C-->I-->G
-    B-->D-->K-->H
+    A-->C-->J-->G
+    A-->D-->L-->H
     subgraph Wrapper
     C
     D
