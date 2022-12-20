@@ -133,7 +133,7 @@ docker exec -it ir_template_gateway_1 /bin/bash
 - ```create_collection(collection_name: str, schema: dict)```
     - Creates a collection with the collection name and the schema.
     - **Parameters**:
-        - **collection_name**: Name of the collection (automatically capitalise first letter as (Weaviate convention)[https://weaviate.io/developers/weaviate/current/more-resources/glossary.html]. )
+        - **collection_name**: Name of the collection (automatically capitalise first letter as [Weaviate class convention](https://weaviate.io/developers/weaviate/current/more-resources/glossary.html). )
         - **schema**: A dictionary consisting of all the fields (Note: Schema of Weaviate requires `doc_id` field)
 - ```delete_collection(collection_name: str)```
     - Deletes the indicated collection
