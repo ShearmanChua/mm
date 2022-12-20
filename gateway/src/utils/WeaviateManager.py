@@ -83,6 +83,7 @@ class VectorManager:
                                 'uuid': '1fbf7a0f-1904-4c21-afd8-6bda380e51fd'
                             }
         """
+        collection_name = collection_name.capitalize()
         if self._exists(collection_name, doc_id):
             where_filter = {
                 'operator': 'Equal',
@@ -110,6 +111,7 @@ class VectorManager:
         bool:               If the doc_id exists in the collection
                             example: True or False
         """
+        collection_name = collection_name.capitalize()
         where_filter = {
             'operator': 'Equal',
             'valueText': doc_id,
@@ -134,6 +136,7 @@ class VectorManager:
         dict:               Dictionary with the success code 200 or errors
                             example: {'response': "200"}
         """
+        collection_name = collection_name.capitalize()
         try:
             self._client.schema.delete_class(collection_name)
         except Exception as e:
@@ -156,6 +159,7 @@ class VectorManager:
         dict:               Dictionary with the success code 200 or errors
                             example: {'response': "200"}
         """
+        collection_name = collection_name.capitalize()
         uuid = self._id2uuid(collection_name, doc_id)
         if 'uuid' in uuid:
             try:
@@ -184,6 +188,7 @@ class VectorManager:
         dict:               Dictionary with the success code 200 or errors
                             example: {'response': "200"}
         """
+        collection_name = collection_name.capitalize()
         if not schema.get('doc_id'):
             return {'response': 'Lack of doc_id as an attribute in property'}
         properties = self._traverse_map(schema)
@@ -222,6 +227,7 @@ class VectorManager:
         dict:               Dictionary with the success code 200 or errors
                             example: {'response': "200"}
         """
+        collection_name = collection_name.capitalize()
         # Check if the doc_id attribute exist
         if not documents.get('doc_id'):
             return {'response': 'Lack of doc_id as an attribute in property'}
@@ -260,6 +266,7 @@ class VectorManager:
         dict:               Dictionary with the success code 200 or errors
                             example: {'response': "200"}
         """
+        collection_name = collection_name.capitalize()
         if not self._exists(collection_name, doc_id):
             return {'response': 'Attempt to read a non-existent document. No reading is done'}
         # Create filter and search
@@ -298,6 +305,7 @@ class VectorManager:
                             }
                             
         """
+        collection_name = collection_name.capitalize()
         if top_k < 1:
             return {'response': 'Invalid top_k'}
         query_vector = {'vector': target_embedding}
@@ -337,6 +345,7 @@ class VectorManager:
         dict:               Dictionary with the success code 200 or errors
                             example: {'response': "200"}
         """
+        collection_name = collection_name.capitalize()
         if not self._exists(collection_name, doc_id):
             return {'response': 'Attempt to read a non-existent document. No reading is done'}
         if 'doc_id' in document:
