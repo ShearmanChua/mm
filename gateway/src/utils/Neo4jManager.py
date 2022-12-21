@@ -104,6 +104,17 @@ class Neo4jManager():
             self.merge_node(node_labels,node)
             for label in node_labels:
                 self.create_index(label.capitalize(), label, node_id)
+    def merge_edge(self, source_node_label, source_node_attribute, target_node_label, target_node_attribute, relation_type, edge_attributes, db=None):
+
+        with conn.driver.session(database=db) if db is not None else conn.driver.session() as session:
+            source_attributes = "{"+", ".join([k+" : '"+str(source_node_attribute[k]).replace(
+                "'", "").encode("ascii", "ignore").decode()+"'" for k in source_node_attribute.keys()])+"}"
+            target_attributes = "{"+", ".join([k+" : '"+str(target_node_attribute[k]).replace(
+                "'", "").encode("ascii", "ignore").decode()+"'" for k in target_node_attribute.keys()])+"}"
+            edge_attributes = "{"+", ".join(
+                [k+" : '"+edge_attributes[k]+"'" for k in edge_attributes.keys()])+"}"
+            # .single().value()
+            return session.run("MATCH (s:{} {}), (t:{} {}) MERGE (s)<-[e:{} {}]-(t) RETURN e".format(source_node_label, source_attributes, target_node_label, target_attributes, relation_type, edge_attributes))
 
     def _generate_edges(self, entities_triples_df, relations_dict, db=None):
         for idx, triple in tqdm(entities_triples_df.iterrows(), total=len(entities_triples_df)):
