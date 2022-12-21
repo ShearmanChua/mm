@@ -99,14 +99,15 @@ class Neo4jManager():
                 if type(node_attribute) == datetime:
                     neo4j_datetime = DateTime(node_attribute.year, node_attribute.month, node_attribute.day, node_attribute.minute, node_attribute.second)
                     node_attributes.update({key, neo4j_datetime})
-            node_labels = node['node_labels']
+            node_labels = [label.capitalize() for label in node['node_labels']]
             node_id = node['node_id']
-            self.merge_node(node_labels,node)
+            node_attributes['neo4j_collection'] = collection_name
+            self.merge_node(node_labels,node_attributes)
             for label in node_labels:
-                self.create_index(label.capitalize(), label, node_id)
+                self.create_index(label.lower()+'_index', label, node_id)
     def merge_edge(self, source_node_label, source_node_attribute, target_node_label, target_node_attribute, relation_type, edge_attributes, db=None):
 
-        with conn.driver.session(database=db) if db is not None else conn.driver.session() as session:
+        with self.neo4j_conn.driver.session(database=db) if db is not None else self.neo4j_conn.driver.session() as session:
             source_attributes = "{"+", ".join([k+" : '"+str(source_node_attribute[k]).replace(
                 "'", "").encode("ascii", "ignore").decode()+"'" for k in source_node_attribute.keys()])+"}"
             target_attributes = "{"+", ".join([k+" : '"+str(target_node_attribute[k]).replace(
@@ -116,8 +117,10 @@ class Neo4jManager():
             # .single().value()
             return session.run("MATCH (s:{} {}), (t:{} {}) MERGE (s)<-[e:{} {}]-(t) RETURN e".format(source_node_label, source_attributes, target_node_label, target_attributes, relation_type, edge_attributes))
 
-    def _generate_edges(self, entities_triples_df, relations_dict, db=None):
-        for idx, triple in tqdm(entities_triples_df.iterrows(), total=len(entities_triples_df)):
+    def _generate_edges(self, entities_triples: Union[pd.DataFrame,List[dict]], relations_dict, db=None):
+        if type(entities_triples) != pd.DataFrame:
+            entities_triples = pd.json_normalize(entities_triples, max_level=0)
+        for idx, triple in tqdm(entities_triples.iterrows(), total=len(entities_triples)):
             source_node_label = "Entity"
             source_node_attributes = {
                 "entity": triple.subject, "doc_id": str(triple.doc_id)}
@@ -128,13 +131,13 @@ class Neo4jManager():
             relation_type = re.sub('[^A-Za-z0-9]+', '_', relation_type)
             edge_attributes = {"relation_id": str(
                 relations_dict[triple.relation]), "doc_id": str(triple.doc_id), "timestamp": str(triple.timestamp)}
-            merge_edge(source_node_label, source_node_attributes, target_node_label,
+            self.merge_edge(source_node_label, source_node_attributes, target_node_label,
                     target_node_attributes, relation_type, edge_attributes, db)
 
     def create_graph(self, collection_name: str, triples: List[dict]):
         triples_df = pd.json_normalize(triples, max_level=0)
-        self.create_node(triples_df['Subject'].values.tolist())
-        self.create_node(triples_df['Object'].values.tolist())
+        self.create_node(collection_name, triples_df['Subject'].values.tolist())
+        self.create_node(collection_name, triples_df['Object'].values.tolist())
 
         return
     
