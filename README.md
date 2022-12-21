@@ -34,6 +34,13 @@ graph LR;
 | **Collection** 	|              Index              	|            Class           	|
 |  **Document**  	|             Document            	|           Object           	|
 |  **Schema**     	|              Mapping              |           Schema           	|
+|  **doc_id**     	|              _id                  |            uuid           	|
+
+## Full Glossary Reference:
+- [ElasticSearch](https://www.elastic.co/guide/en/elastic-stack-glossary/current/terms.html)
+- [Weaviate](https://weaviate.io/developers/weaviate/current/more-resources/glossary.html)
+
+
 
 
 # Supported Frameworks
@@ -91,8 +98,8 @@ docker exec -it ir_template_gateway_1 /bin/bash
     - `numpy.ndarray`
 
     Note:
-    - Weaviate ignores `torch.tensor` and `numpy.ndarray` fields because there will be a dedicated parameter for uploading vector
-    - Weaviate **DOES NOT** support nested mapping
+    - Weaviate ignores `torch.tensor` and `numpy.ndarray` fields because there will be a dedicated parameter for uploading vector.
+    - Weaviate **DOES NOT** support nested schema.
     - It is required for Weaviate schema to contain `doc_id` field, which is used for alignment of id across multiple frameworks. The baseline id shall be the one from ElasticSearch. 
 
     Some example of a schema is as shown:
@@ -100,7 +107,7 @@ docker exec -it ir_template_gateway_1 /bin/bash
     ```
     user_schema = {
         "name":"str",
-        "id_no":"str",
+        "doc_id":"str",
         "age":"int",
         "school":"str",
         "grades":"float"
@@ -133,7 +140,7 @@ docker exec -it ir_template_gateway_1 /bin/bash
 - ```create_collection(collection_name: str, schema: dict)```
     - Creates a collection with the collection name and the schema.
     - **Parameters**:
-        - **collection_name**: Name of the collection (automatically capitalise first letter as [Weaviate class convention](https://weaviate.io/developers/weaviate/current/more-resources/glossary.html). )
+        - **collection_name**: Name of the collection
         - **schema**: A dictionary consisting of all the fields (Note: Schema of Weaviate requires `doc_id` field)
 - ```delete_collection(collection_name: str)```
     - Deletes the indicated collection
@@ -143,12 +150,12 @@ docker exec -it ir_template_gateway_1 /bin/bash
 ### Documents
 [//]: <> (TODO: Align and fix create_document for weaviate)
 
-- ```create_document(collection_name: str, documents: List[Dict], id_field: str=None)``` (ElasticSearch)
+- ```create_document(collection_name: str, documents: dict, id_field: str=None)``` (ElasticSearch)
 <br> ```create_document(collection_name: str, documents: dict, embedding: torch.Tensor)``` (Weaviate)
     - Creates document within the collection. </br>
     - **Parameters**:
         - **collection_name**: Name of the collection
-        - **documents**: Dictionary containing all the fields and its value for the document to be created
+        - **documents**: Dictionary containing all the fields and its value for the document to be created (ElasticSearch supports a list of dictionary (i.e. List[dict]) as well. For bulk uploading, consolidate documents in a list before calling this function)
         - **id_field** (ElasticSearch): Specify the field from the documents to use as the internal id value. If no field is indicated, then ElasticSearch's generated id will be used instead. 
         - **embedding** (Weaviate): Vector associated with the document to be created
 

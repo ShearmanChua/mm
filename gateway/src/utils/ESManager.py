@@ -154,7 +154,7 @@ class DocManager():
             return {"response": f"{e}"}
         return {"response":"200"}
     
-    def create_document(self, collection_name: str, documents: List[Dict], id_field: str=None) -> dict:
+    def create_document(self, collection_name: str, documents: dict, id_field: str=None) -> dict:
         """
         Upload document(s) in the specified index within ElasticSearch
 
@@ -168,13 +168,18 @@ class DocManager():
 
         """
         if not self._check_data_type(documents, list):
-            return {"response":"Type of 'documents' is not dict"}
+            if not self._check_data_type(documents, dict):
+                return {"response":"Type of 'documents' is not dict or a list"}
         if not self._check_data_type(collection_name, str):
             return {"response":"Type of 'collection_name' is not str"}
         if not id_field is None:
             if not self._check_data_type(id_field, str):
                 return {"response":"Type of 'id_field' is not str"}
         
+        # If single document, wrap it in a list so it can be an iterable as it would be when a list of document is submitted
+        if type(documents)==dict: 
+            documents = [documents]
+
         # If id_field is specified, verify that all documents possess the id_field. 
         if id_field != None:
             for doc in documents:
@@ -189,13 +194,14 @@ class DocManager():
                            "error_doc": doc}
         all_id = []
         for doc in documents:
+            doc_copy = dict(doc)
             action_dict={}
             action_dict['_op_type']= 'index'
             action_dict['_index']=collection_name
             if id_field != None:
-                action_dict['_id']=doc[id_field]
-                doc.pop(id_field)
-            action_dict['_source']=doc
+                action_dict['_id']=doc_copy[id_field]
+                doc_copy.pop(id_field)
+            action_dict['_source']=doc_copy
             self.consolidated_actions.append(action_dict)
             if len(self.consolidated_actions) == MAX_BULK_SIZE:
                 all_id = all_id+self._flush()
