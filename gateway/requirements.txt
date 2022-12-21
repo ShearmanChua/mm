@@ -6,4 +6,4 @@ requests==2.28.1
 torch==1.13.0
 tritonclient[all]==2.28.0
 weaviate-client==3.9.0
-neo4uj==5.3.0
+neo4j==5.3.0

@@ -179,7 +179,15 @@ docker exec -it ir_template_gateway_1 /bin/bash
         - **document**: Dictionary containing the fields and its value for the document to be updated. Only fields found in the dictionary will be updated. 
 
 
+# neo4j Wrapper -> `Neo4jManager`
 
+### Graph
+
+```create_graph(collection_name: str, triples: List[dict])``` 
+    - Creates document within the collection. </br>
+    - **Parameters**:
+        - **collection_name**: Name of the collection for the Graph to be created
+        - **triples**: List of nested dictionaries where each dictionary is a triple containing 3 nested dictionaries for the `Subject`, `Predicate`, and `Object` of the triple. 
 
 # Weaviate Wrapper -> `VectorManager`
 
