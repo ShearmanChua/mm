@@ -201,5 +201,10 @@ docker exec -it ir_template_gateway_1 /bin/bash
         - **target_embedding**: The vector to be compared against the database
         - **top_k**: Number of results to return. (Maximum 100) 
 
+### Graph
 
-
+- (Neo4j) ```create_graph(collection_name: str, triples: List[dict])``` 
+        - Creates document within the collection. </br>
+        - **Parameters**:
+            - **collection_name**: Name of the collection for the Graph to be created
+            - **triples**: List of nested dictionaries where each dictionary is a triple containing 3 nested dictionaries for the `Subject`, `Predicate`, and `Object` of the triple. 
