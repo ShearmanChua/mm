@@ -205,7 +205,7 @@ class VectorManager:
             return {'response': f"Unknown error with error message -> {e}"}
         return {'response': "200"}
 
-    def create_document(self, collection_name: str, documents: dict, embedding: torch.Tensor) -> dict:
+    def create_document(self, collection_name: str, documents: Union[list, dict]) -> dict:
         """
         Create a document in a specified collection
 
@@ -213,14 +213,11 @@ class VectorManager:
         ------------------------------------
         collection_name:    Name of collection
                             example shape:  'Faces'
-        documents:          Schema for the document
+        documents:          Schema for the document. To update embedding, include 'vector' key in the dict. 
                             example: {
-                                "doc_id": "72671"
+                                "doc_id": "72671",
+                                "vector": []
                             }
-        embedding:          embedding for the document
-                            example: torch.Tensor([[
-                                1, 2, ..., 512
-                            ]])
 
         RETURNS: 
         ------------------------------------
@@ -228,27 +225,37 @@ class VectorManager:
                             example: {'response': "200"}
         """
         collection_name = collection_name.capitalize()
-        # Check if the doc_id attribute exist
-        if not documents.get('doc_id'):
-            return {'response': 'Lack of doc_id as an attribute in property'}
-        # Check if the id exist
-        id_exists = self._exists(collection_name, documents['doc_id'])
-        if id_exists:
-            return {'response': 'This id already existed, please use update instead'}
-        # Create document
-        try:
-            self._client.data_object.create(
-              documents,
-              collection_name,
-              vector = embedding
-            )
-            return {'response': "200"}
-        except Exception as e:
-            if "vector lengths don't match"in str(e):
-                self.delete_document(collection_name, documents['doc_id'])
-                return {'response':"Mismatch vector length, creation failed"}
-            else:
-                return {'response': f"{e}"}
+        if type(documents) == dict:
+            documents = [documents]
+        for doc in documents:
+            embedding=None
+            # Check if the doc_id attribute exist
+            if not doc.get('doc_id'):
+                return {'response': 'Lack of doc_id as an attribute in property'}
+            # Check if the id exist
+            id_exists = self._exists(collection_name, doc['doc_id'])
+            if id_exists:
+                return {'response': 'This id already existed, please use update instead'}
+            # Create document
+            if "vector" in doc:
+                valid_vec_type = [numpy.ndarray, torch.Tensor, list]
+                if not type(doc['vector']) in valid_vec_type:
+                    return {'response': "Invalid vector type. Supported vector types: numpy.ndarray, torch.Tensor, list"}
+                embedding=doc['vector']
+                doc.pop('vector')
+            try:
+                self._client.data_object.create(
+                doc,
+                collection_name,
+                vector = embedding
+                )
+                return {'response': "200"}
+            except Exception as e:
+                if "vector lengths don't match" in str(e):
+                    self.delete_document(collection_name, doc['doc_id'])
+                    return {'response':"Mismatch vector length, creation failed"}
+                else:
+                    return {'response': f"{e}"}
 
     def read_document(self, collection_name: str, doc_id: str) -> dict:
         """
