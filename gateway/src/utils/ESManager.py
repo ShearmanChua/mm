@@ -109,13 +109,14 @@ class DocManager():
                 items.append((new_key, v))
         return dict(items)
     
-    def create_collection(self, collection_name: str, schema: Dict) -> Dict:
+    def create_collection(self, collection_name: str, schema: Dict, custom_schema: bool=False) -> Dict:
         """
         Create the index on ElasticSearch
 
         Args:
             collection_name (str): Index name of ES
             schema (dict): Mapping to be used to create ES index
+            custom_schema (bool): If set to True, user may input schema that in accordance to ElasticSearch Mapping's format. The schema will not be parsed. 
 
         Returns:
             dict: response of error, or 200 if no errors caught
@@ -125,16 +126,24 @@ class DocManager():
             return {"response":"Type of 'schema' is not dict"}
         if not self._check_data_type(collection_name, str):
             return {"response":"Type of 'collection_name' is not str"}
-
-        mapping_validity = self._check_valid_values(schema)
-        if not mapping_validity:
-            return {"response": "KeyError: data type not found in TYPE_MAP"}
-        updated_mapping = self._traverse_map(schema)
-        try:
-            self.client.indices.create(index=collection_name, mappings=updated_mapping)
-        except Exception as e:
-            return {"response":f"{e}"}
-        return {"response":"200"}
+        if not self._check_data_type(custom_schema, bool):
+            return {"response":"Type of 'custom_schema' is not bool"}
+        if custom_schema:
+            try:
+                self.client.indices.create(index=collection_name, mappings=schema)
+            except Exception as e:
+                return {"response":f"{e}"}
+            return {"response":"200"}
+        else:
+            mapping_validity = self._check_valid_values(schema)
+            if not mapping_validity:
+                return {"response": "KeyError: data type not found in TYPE_MAP"}
+            updated_mapping = self._traverse_map(schema)
+            try:
+                self.client.indices.create(index=collection_name, mappings=updated_mapping)
+            except Exception as e:
+                return {"response":f"{e}"}
+            return {"response":"200"}
     
     def delete_collection(self, collection_name: str) -> dict:
         """

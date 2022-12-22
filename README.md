@@ -137,11 +137,13 @@ docker exec -it ir_template_gateway_1 /bin/bash
 # Functions
 
 ### Collections
-- ```create_collection(collection_name: str, schema: dict)```
+- (ElasticSearch) ```create_collection(self, collection_name: str, schema: Dict, custom_schema: bool=False)```
+<br /> (Weaviate) ```create_collection(collection_name: str, schema: dict)```
     - Creates a collection with the collection name and the schema.
     - **Parameters**:
         - **collection_name**: Name of the collection
         - **schema**: A dictionary consisting of all the fields (Note: Schema of Weaviate requires `doc_id` field)
+        - **custom_schema**: If set to True, user may input schema that in accordance to ElasticSearch Mapping's format. The schema will not be parsed.
 - ```delete_collection(collection_name: str)```
     - Deletes the indicated collection
     - **Parameters**:
