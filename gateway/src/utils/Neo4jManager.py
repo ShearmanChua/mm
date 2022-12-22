@@ -117,28 +117,43 @@ class Neo4jManager():
             # .single().value()
             return session.run("MATCH (s:{} {}), (t:{} {}) MERGE (s)<-[e:{} {}]-(t) RETURN e".format(source_node_label, source_attributes, target_node_label, target_attributes, relation_type, edge_attributes))
 
-    def _generate_edges(self, entities_triples: Union[pd.DataFrame,List[dict]], relations_dict, db=None):
+    def generate_edges(self,collection_name: str, entities_triples: Union[pd.DataFrame,List[dict]], db=None):
         if type(entities_triples) != pd.DataFrame:
             entities_triples = pd.json_normalize(entities_triples, max_level=0)
         for idx, triple in tqdm(entities_triples.iterrows(), total=len(entities_triples)):
-            source_node_label = "Entity"
-            source_node_attributes = {
-                "entity": triple.subject, "doc_id": str(triple.doc_id)}
-            target_node_label = "Entity"
-            target_node_attributes = {
-                "entity": triple.object, "doc_id": str(triple.doc_id)}
-            relation_type = triple.relation.replace(" ", "_")
+            source_node_labels = triple['Subject']['node_labels']
+            source_node_attributes = triple['Subject']
+            for key,node_attribute in source_node_attributes:
+                if type(node_attribute) == datetime:
+                    neo4j_datetime = DateTime(node_attribute.year, node_attribute.month, node_attribute.day, node_attribute.minute, node_attribute.second)
+                    source_node_attributes.update({key, neo4j_datetime})
+            source_node_labels = [label.capitalize() for label in source_node_labels]
+            source_node_labels = triple['Subject']['node_labels']
+
+            target_node_attributes = triple['Object']
+            for key,node_attribute in target_node_attributes:
+                if type(node_attribute) == datetime:
+                    neo4j_datetime = DateTime(node_attribute.year, node_attribute.month, node_attribute.day, node_attribute.minute, node_attribute.second)
+                    target_node_attributes.update({key, neo4j_datetime})
+            target_node_labels = [label.capitalize() for label in target_node_labels]
+
+            relation_type = triple['Predicate']['relation_type']
             relation_type = re.sub('[^A-Za-z0-9]+', '_', relation_type)
-            edge_attributes = {"relation_id": str(
-                relations_dict[triple.relation]), "doc_id": str(triple.doc_id), "timestamp": str(triple.timestamp)}
-            self.merge_edge(source_node_label, source_node_attributes, target_node_label,
+            edge_attributes = triple['Predicate']
+            for key,edge_attribute in edge_attributes:
+                if type(edge_attribute) == datetime:
+                    neo4j_datetime = DateTime(edge_attribute.year, edge_attribute.month, edge_attribute.day, edge_attribute.minute, edge_attribute.second)
+                    edge_attributes.update({key, neo4j_datetime})
+            edge_attributes['neo4j_collection'] = collection_name
+
+            self.merge_edge(source_node_labels, source_node_attributes, target_node_labels,
                     target_node_attributes, relation_type, edge_attributes, db)
 
     def create_graph(self, collection_name: str, triples: List[dict]):
         triples_df = pd.json_normalize(triples, max_level=0)
         self.create_node(collection_name, triples_df['Subject'].values.tolist())
         self.create_node(collection_name, triples_df['Object'].values.tolist())
-
+        self.generate_edges(collection_name, triples)
         return
     
   
