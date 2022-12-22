@@ -208,3 +208,5 @@ docker exec -it ir_template_gateway_1 /bin/bash
         - **Parameters**:
             - **collection_name**: Name of the collection for the Graph to be created
             - **triples**: List of nested dictionaries where each dictionary is a triple containing 3 nested dictionaries for the `Subject`, `Predicate`, and `Object` of the triple. 
+
+github don't let me commit to main :(
