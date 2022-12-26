@@ -7,3 +7,6 @@
 [submodule "visual_inference/mm_faceid"]
 	path = visual_inference/mm_faceid
 	url = https://github.com/manekiyong/mm-faceid.git
+[submodule "visual_inference/mm_objdet"]
+	path = visual_inference/mm_objdet
+	url = https://github.com/manekiyong/mm-objdet.git
