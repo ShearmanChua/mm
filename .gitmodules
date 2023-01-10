@@ -13,3 +13,6 @@
 [submodule "text_inference/RE_module"]
 	path = text_inference/RE_module
 	url = https://github.com/ShearmanChua/relation-extraction-module.git
+[submodule "text_inference/EL_module"]
+	path = text_inference/EL_module
+	url = https://github.com/ShearmanChua/EL-module.git
