@@ -15,8 +15,8 @@ Pre-requisite:
 Elasticsearch index 
 """
 
-IMAGE_FOLDER = ""
-FACENET_ENDPT = ""
+IMAGE_FOLDER = "../data/m2e2/images"
+FACENET_ENDPT = "http://faceid:8000/"
 YOLO_ENDPT = ""
 INDEX_NAME = 'documents_m2e2'
 

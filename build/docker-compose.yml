@@ -133,8 +133,7 @@ services:
       - 8001:8001
       - 8002:8002
     command: tritonserver --model-repository=/models
-
-
+    
   faceid:
     build: ../visual_inference/mm_faceid/face_id_api
     ports:
@@ -145,7 +144,34 @@ services:
     ulimits:
       memlock: -1 # set upper limit for how much memory is locked for the container (-1 means lock as much as the container uses)
     shm_size: 4gb
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    # volumes:
+    #   - ../visual_inference/mm_faceid/data:/data
+    command: uvicorn main:api --host 0.0.0.0
 
+  objdet:
+    build: ../visual_inference/mm_objdet
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    ports:
+      #to the host
+      - 8005:8000 #host:container
+    stdin_open: true
+    tty: true
+    ulimits:
+      memlock: -1 # set upper limit for how much memory is locked for the container (-1 means lock as much as the container uses)
+    shm_size: 4gb
     volumes:
-      - ../visual_inference/mm_faceid/data:/data
+      - ../visual_inference/mm_objdet/src:/src
     command: uvicorn main:api --host 0.0.0.0
