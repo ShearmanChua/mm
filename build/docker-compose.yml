@@ -102,7 +102,6 @@ services:
       - ${KIBANA_H_PORT}:${KIBANA_C_PORT}
 
 
-
   weaviate:
     image: semitechnologies/weaviate:${WEAVIATE_VERSION}
     ports:
@@ -118,3 +117,35 @@ services:
       DEFAULT_VECTORIZER_MODULE: 'none'
       CLUSTER_HOSTNAME: 'node1'
       PROMETHEUS_MONITORING_ENABLED: 'true'
+
+  triton:
+    # image: triton
+    build: ../triton/
+    stdin_open: true
+    tty: true
+    volumes:
+      - ../triton/models:/models
+    ulimits:
+      memlock: -1 # set upper limit for how much memory is locked for the container (-1 means lock as much as the container uses)
+    shm_size: 16gb # set upper limit for how much shared memory container can use
+    ports:
+      - 8000:8000
+      - 8001:8001
+      - 8002:8002
+    command: tritonserver --model-repository=/models
+
+
+  faceid:
+    build: ../visual_inference/mm_faceid/face_id_api
+    ports:
+      #to the host
+      - 8004:8000 #host:container
+    stdin_open: true
+    tty: true
+    ulimits:
+      memlock: -1 # set upper limit for how much memory is locked for the container (-1 means lock as much as the container uses)
+    shm_size: 4gb
+
+    volumes:
+      - ../visual_inference/mm_faceid/data:/data
+    command: uvicorn main:api --host 0.0.0.0
