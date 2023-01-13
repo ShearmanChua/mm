@@ -10,3 +10,9 @@
 [submodule "visual_inference/mm_objdet"]
 	path = visual_inference/mm_objdet
 	url = https://github.com/manekiyong/mm-objdet.git
+[submodule "text_inference/RE_module"]
+	path = text_inference/RE_module
+	url = https://github.com/ShearmanChua/relation-extraction-module.git
+[submodule "text_inference/EL_module"]
+	path = text_inference/EL_module
+	url = https://github.com/ShearmanChua/EL-module.git
