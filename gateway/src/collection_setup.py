@@ -11,4 +11,4 @@ if __name__ == '__main__':
     DocMgr.create_collection('documents_m2e2', schema=es_mapping, custom_schema=True)
     VecMgr.create_collection('face_db', schema=weaviate_schema)
 
-    
+    # Populate face db 
