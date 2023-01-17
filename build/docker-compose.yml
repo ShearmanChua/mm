@@ -76,7 +76,7 @@ services:
       - ../image_server/images:/images
     # ports:
     #   - 8888:8880
-    command: uvicorn main:api --host 0.0.0.0
+    command: uvicorn main:api --reload --host 0.0.0.0
     restart: always
     ulimits:
       memlock: -1 # set upper limit for how much memory is locked for the container (-1 means lock as much as the container uses)
@@ -164,9 +164,9 @@ services:
             - driver: nvidia
               count: 1
               capabilities: [gpu]
-    # volumes:
-    #   - ../visual_inference/mm_faceid/data:/data
-    command: uvicorn main:api --host 0.0.0.0
+    volumes:
+      - ../visual_inference/mm_faceid/face_id_api/src:/src
+    command: uvicorn main:api --reload --host 0.0.0.0
 
   objdet:
     build: ../visual_inference/mm_objdet
@@ -187,4 +187,4 @@ services:
     shm_size: 4gb
     volumes:
       - ../visual_inference/mm_objdet/src:/src
-    command: uvicorn main:api --host 0.0.0.0
+    command: uvicorn main:api --reload --host 0.0.0.0
