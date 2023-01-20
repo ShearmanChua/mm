@@ -20,3 +20,18 @@ def get_face_emb(folder_root, id):
         f"{FACEID_ENDPT}/embedding", data=payload, headers=headers)
     res_fn = json.loads(r_fn.text)
     return res_fn
+
+def single_inference(filename):
+    headers = {'Content-type': 'application/json',
+    'Accept': 'text/plain'}
+    with open(filename, "rb") as f:
+        im_bytes = f.read()
+    im_b64 = base64.b64encode(im_bytes).decode("utf8")
+    payload = json.dumps({"image":im_b64})
+
+    r_fn = requests.post(
+        f"{FACEID_ENDPT}/detect", data=payload, headers=headers)
+    res_fn = json.loads(r_fn.text)
+    return res_fn
+
+

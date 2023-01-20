@@ -62,3 +62,4 @@ if __name__ == '__main__':
     r = DocMgr.create_document(DOC_COLLECTION_NAME, all_docs)
     print(r['response'])
 
+
