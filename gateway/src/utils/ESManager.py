@@ -21,7 +21,7 @@ TYPE_MAP =  {
     "numpy.ndarray": "dense_vector"
 }
 
-MAX_BULK_SIZE=10000
+MAX_BULK_SIZE=5000
 
 class DocManager():
     
@@ -92,7 +92,8 @@ class DocManager():
                 errors.append(item)
             else:
                 list_of_es_ids.append(item['index']['_id'])
-        print("List of faulty documents:", errors)
+        if len(errors)!=0:
+            print("List of faulty documents:", errors)
         self.consolidated_actions=[] # Reset List
         return list_of_es_ids
         
