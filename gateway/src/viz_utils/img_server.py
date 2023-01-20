@@ -11,7 +11,6 @@ class ImageUploader:
 
         # full_name = os.path.join(self.source_root,filename+'.jpg')
         full_name = os.path.join(self.source_root, filename)
-        print(full_name)
 
         with open(full_name, "rb") as f:
             im_bytes = f.read()
