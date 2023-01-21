@@ -7,7 +7,7 @@ from utils.ESManager import DocManager
 from utils.WeaviateManager import VectorManager
 from doc_utils.preprocess import M2E2_Preprocessor
 from doc_utils.wikipedia import Wikipedia
-from viz_utils.faceid import get_face_emb
+from viz_utils.faceid import get_face_emb, single_inference
 
 FACE_COLLECTION_NAME = "face_db"
 DOC_COLLECTION_NAME = "documents_m2e2"
@@ -63,3 +63,6 @@ if __name__ == '__main__':
     print(r['response'])
 
 
+    # Visual Inferences
+    img_folder = os.path.join(DATA_ROOT, 'images_m2e2')
+    
