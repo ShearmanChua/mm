@@ -67,6 +67,20 @@ services:
           "-c",
           "curl -sf --insecure https://$ELASTIC_USERNAME:$ELASTIC_PASSWORD@localhost:9200/_cat/health | grep -ioE 'green|yellow' || echo 'not green/yellow cluster status'"
         ]
+  image_server:
+    build: ../image_server
+    stdin_open: true
+    tty: true
+    volumes:
+      - ../image_server/src:/src
+      - ../image_server/images:/images
+    # ports:
+    #   - 8888:8880
+    command: uvicorn main:api --reload --host 0.0.0.0
+    restart: always
+    ulimits:
+      memlock: -1 # set upper limit for how much memory is locked for the container (-1 means lock as much as the container uses)
+    shm_size: 32gb # set upper limit for how much shared memory container can use
 
   gateway:
     build: ../gateway
@@ -100,7 +114,6 @@ services:
         target: /certs/kibana.key
     ports:
       - ${KIBANA_H_PORT}:${KIBANA_C_PORT}
-
 
   weaviate:
     image: semitechnologies/weaviate:${WEAVIATE_VERSION}
