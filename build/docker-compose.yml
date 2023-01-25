@@ -269,3 +269,16 @@ services:
             - driver: nvidia
               count: 1
               capabilities: [gpu]
+  ui:
+    build: ../ui
+    stdin_open: true
+    tty: true
+    # volumes:
+    #   - ../document_population/data/images:/images
+    environment:
+      ELASTIC_USERNAME: ${ELASTIC_USERNAME}
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
+      ELASTICSEARCH_HOST_PORT: https://${ELASTICSEARCH_HOST}:${ELASTICSEARCH_C_PORT}
+
+    ports:
+      - ${UI_H_PORT}:${UI_C_PORT}
