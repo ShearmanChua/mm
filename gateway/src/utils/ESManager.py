@@ -282,8 +282,26 @@ class DocManager():
         
         try:
             resp = self.client.update(index=collection_name, id=doc_id, doc=document)
+            for key in document.keys():
+
+                q = {
+                    "script": {
+                        "source": f"ctx._source.{key}=params.infer",
+                        "params": {
+                            "infer": document[key]
+                        },
+                        "lang": "painless"
+                    },
+                    "query": {
+                        "match": {
+                            "_id": doc_id
+                        }
+                    }
+                }
+                self.client.update_by_query(
+                    body=q, index=collection_name)        
         except Exception as e:
-            return {"response":f"{e.__class__.__name__}. Document Deletion failed"}
+            return {"response":f"{e.__class__.__name__}. Document Update failed"}
         
         return {"response":"200", "api_resp": resp}
     
