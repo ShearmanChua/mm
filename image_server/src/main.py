@@ -16,15 +16,15 @@ api = FastAPI(
 
 
 class ImageData(BaseModel):
-
     filename: str
     image: str
 
 
 class ImageMetaData(BaseModel):
-
     server_path: str
 
+class PathData(BaseModel):
+    folder_path: str
 
 @api.put("/upload/")
 def upload_image(image_data: ImageData):
@@ -43,19 +43,31 @@ def upload_image(image_data: ImageData):
 
 @api.get("/download/")
 def download_image(image_metadata: ImageMetaData):
-
     server_path = image_metadata.dict()['server_path']
-    reader = F1ImageReader()
+    reader = M2E2ImageReader()
 
     response = {}
     try:
-
         response['image'] = reader.read_single_image(server_path)
         response['status'] = 'success'
     except:
         response['image'] = None
         response['status'] = 'failure'
     return response
+
+@api.get("/listdir/")
+def listdir(path_data: PathData):
+    folder_path = path_data.dict()['folder_path']
+    response = {}
+    try:
+
+        response['files'] = os.listdir(folder_path)
+        response['status'] = 'success'
+    except:
+        response['files'] = None
+        response['status'] = 'failure'
+    return response
+
 
 
 class M2E2ImageWriter:
@@ -91,6 +103,21 @@ class M2E2ImageWriter:
 
             file.close()
             return file_path
+
+
+class M2E2ImageReader:
+
+    def __init__(self):
+        self.image_root = '/images'
+        self.prefix = 'M2E2'
+
+    def read_single_image(self, filepath):
+
+        with h5py.File(filepath, "r") as f:
+
+            image = f['image'].attrs['img']
+
+        return image
 
 
 class F1ImageWriter:
