@@ -33,3 +33,22 @@ class ImageUploader:
             server_path = self.upload_single_image(i)
             all_server_path.append(server_path)
         return all_server_path
+
+    def download_single_image(self, filename):
+        body = {
+            'server_path':filename
+        }
+        r = requests.get(
+            f'http://{self.server_address}:8000/download/', json=body)
+        if r.json()['status']=='success':
+            return r.json()['image']
+        else:
+            return ''
+
+    def listdir(self, path):
+        body = {
+            'folder_path':path
+        }
+        r = requests.get(
+            f'http://{self.server_address}:8000/listdir/', json=body)
+        return r.json()['files']

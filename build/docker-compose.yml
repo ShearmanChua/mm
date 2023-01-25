@@ -188,3 +188,17 @@ services:
     volumes:
       - ../visual_inference/mm_objdet/src:/src
     command: uvicorn main:api --reload --host 0.0.0.0
+
+  ui:
+    build: ../ui
+    stdin_open: true
+    tty: true
+    # volumes:
+    #   - ../document_population/data/images:/images
+    environment:
+      ELASTIC_USERNAME: ${ELASTIC_USERNAME}
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
+      ELASTICSEARCH_HOST_PORT: https://${ELASTICSEARCH_HOST}:${ELASTICSEARCH_C_PORT}
+
+    ports:
+      - ${UI_H_PORT}:${UI_C_PORT}
