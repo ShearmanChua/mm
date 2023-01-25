@@ -190,7 +190,7 @@ services:
     command: uvicorn main:api --reload --host 0.0.0.0
 
   entity-linking-api:
-    build: ../text_inference/EL_module/build
+    build: ../text_inference/EL_module
     stdin_open: true
     tty: true
     ports:
@@ -215,7 +215,7 @@ services:
               capabilities: [gpu]
 
   NER-api:
-    build: ../text_inference/NER_module/build
+    build: ../text_inference/NER_module
     stdin_open: true
     tty: true
     networks:
@@ -243,7 +243,7 @@ services:
               capabilities: [gpu]
 
   RE-api:
-    build: ../text_inference/RE_module/build
+    build: ../text_inference/RE_module
     stdin_open: true
     tty: true
     networks:
