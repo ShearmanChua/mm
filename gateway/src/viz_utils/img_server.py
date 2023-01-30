@@ -35,6 +35,9 @@ class ImageUploader:
         return all_server_path
 
     def download_single_image(self, filename):
+        """
+        Takes in path of image on image server, and returns the b64 encoded string of the img
+        """
         body = {
             'server_path':filename
         }
