@@ -189,6 +189,30 @@ services:
       - ../visual_inference/mm_objdet/src:/src
     command: uvicorn main:api --reload --host 0.0.0.0
 
+  vg:
+    build: ../visual_inference/mm_vg
+    stdin_open: true
+    tty: true
+    ulimits:
+      memlock: -1 # set upper limit for how much memory is locked for the container (-1 means lock as much as the container uses)
+    shm_size: 32gb
+    ports:
+      - 8006:8000
+    deploy:
+          resources:
+            reservations:
+              devices:
+                - driver: nvidia
+                  count: 1
+                  capabilities: [gpu]
+    volumes:
+      - ../data:/data
+      - ../models:/models
+      - ../src:/src
+    command: uvicorn main:api --reload --host 0.0.0.0
+    
+
+
   entity-linking-api:
     build: ../text_inference/EL_module
     stdin_open: true
