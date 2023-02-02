@@ -213,86 +213,86 @@ services:
     
 
 
-  # entity-linking-api:
-  #   build: ../text_inference/EL_module
-  #   stdin_open: true
-  #   tty: true
-  #   ports:
-  #     - 5050:5050
-  #   command: ["uvicorn", "api_service:app", "--host", "0.0.0.0", "--port", "5050"]
-  #   volumes:
-  #       - ../text_inference/EL_module/models:/BLINK_api/models
-  #       - ../text_inference/EL_module/configs:/BLINK_api/configs
-  #       - ../text_inference/EL_module/src:/BLINK_api/src
-  #   environment:
-  #     NVIDIA_VISIBLE_DEVICES: 0
-  #     CUDA_VISIBLE_DEVICES: 0
-  #   ulimits:
-  #     memlock: -1
-  #   shm_size: '16gb'
-  #   deploy:
-  #     resources:
-  #       reservations:
-  #         devices:
-  #           - driver: nvidia
-  #             count: 1
-  #             capabilities: [gpu]
+  entity-linking-api:
+    build: ../text_inference/EL_module
+    stdin_open: true
+    tty: true
+    ports:
+      - 5050:5050
+    command: ["uvicorn", "api_service:app", "--host", "0.0.0.0", "--port", "5050"]
+    volumes:
+        - ../text_inference/EL_module/models:/BLINK_api/models
+        - ../text_inference/EL_module/configs:/BLINK_api/configs
+        - ../text_inference/EL_module/src:/BLINK_api/src
+    environment:
+      NVIDIA_VISIBLE_DEVICES: 0
+      CUDA_VISIBLE_DEVICES: 0
+    ulimits:
+      memlock: -1
+    shm_size: '16gb'
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
 
-  # NER-api:
-  #   build: ../text_inference/NER_module
-  #   stdin_open: true
-  #   tty: true
-  #   networks:
-  #     - default
-  #   ports:
-  #     - 8080:8080
-  #   command: ["uvicorn", "api_service:app", "--host", "0.0.0.0", "--port", "8080"]
-  #   environment:
-  #     NVIDIA_VISIBLE_DEVICES: 0
-  #     CUDA_VISIBLE_DEVICES: 0
-  #   ulimits:
-  #     memlock: -1
-  #   shm_size: '16gb'
-  #   volumes:
-  #     - ../text_inference/NER_module/spanNER/src:/NER_module/src
-  #     - ../text_inference/spanNER/config:/NER_module/config
-  #     - ../text_inference/spanNER/models:/NER_module/models
-  #     - ../text_inference/data:/NER_module/data
-  #   deploy:
-  #     resources:
-  #       reservations:
-  #         devices:
-  #           - driver: nvidia
-  #             count: 1
-  #             capabilities: [gpu]
+  NER-api:
+    build: ../text_inference/NER_module
+    stdin_open: true
+    tty: true
+    networks:
+      - default
+    ports:
+      - 8080:8080
+    command: ["uvicorn", "api_service:app", "--host", "0.0.0.0", "--port", "8080"]
+    environment:
+      NVIDIA_VISIBLE_DEVICES: 0
+      CUDA_VISIBLE_DEVICES: 0
+    ulimits:
+      memlock: -1
+    shm_size: '16gb'
+    volumes:
+      - ../text_inference/NER_module/spanNER/src:/NER_module/src
+      - ../text_inference/spanNER/config:/NER_module/config
+      - ../text_inference/spanNER/models:/NER_module/models
+      - ../text_inference/data:/NER_module/data
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
 
-  # RE-api:
-  #   build: ../text_inference/RE_module
-  #   stdin_open: true
-  #   tty: true
-  #   networks:
-  #     - default
-  #   ports:
-  #     - 8088:8088
-  #   command: ["uvicorn", "api_service:app", "--host", "0.0.0.0", "--port", "8088"]
-  #   environment:
-  #     NVIDIA_VISIBLE_DEVICES: 0
-  #     CUDA_VISIBLE_DEVICES: 0
-  #   ulimits:
-  #     memlock: -1
-  #   shm_size: '16gb'
-  #   volumes:
-  #     - ../text_inference/RE_module/spanREL/src:/RE_module/src
-  #     - ../text_inference/RE_module/spanREL/config:/RE_module/config
-  #     - ../text_inference/RE_module/spanREL/models:/RE_module/models
-  #     - ../text_inference/RE_module/data:/RE_module/data
-  #   deploy:
-  #     resources:
-  #       reservations:
-  #         devices:
-  #           - driver: nvidia
-  #             count: 1
-  #             capabilities: [gpu]
+  RE-api:
+    build: ../text_inference/RE_module
+    stdin_open: true
+    tty: true
+    networks:
+      - default
+    ports:
+      - 8088:8088
+    command: ["uvicorn", "api_service:app", "--host", "0.0.0.0", "--port", "8088"]
+    environment:
+      NVIDIA_VISIBLE_DEVICES: 0
+      CUDA_VISIBLE_DEVICES: 0
+    ulimits:
+      memlock: -1
+    shm_size: '16gb'
+    volumes:
+      - ../text_inference/RE_module/spanREL/src:/RE_module/src
+      - ../text_inference/RE_module/spanREL/config:/RE_module/config
+      - ../text_inference/RE_module/spanREL/models:/RE_module/models
+      - ../text_inference/RE_module/data:/RE_module/data
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
   ui:
     build: ../ui
     stdin_open: true
