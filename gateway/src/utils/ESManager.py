@@ -245,7 +245,7 @@ class DocManager():
             return {"response": f"Document '{doc_id}' not found!"}
         
         try:
-            resp = self.client.delete(index="meow", id=doc_id)
+            resp = self.client.delete(index=collection_name, id=doc_id)
         except Exception as e:
             return {"response":f"{e.__class__.__name__}. Document Deletion failed"}
         
