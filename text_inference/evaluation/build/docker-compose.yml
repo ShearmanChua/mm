@@ -1,0 +1,28 @@
+version: '3.4'
+
+volumes:
+  elasticsearch-data:
+
+services:
+  evaluation:
+    build: ../
+    stdin_open: true
+    tty: true
+    ports:
+      - 8082:8888
+    volumes:
+      - ../notebooks:/evaluation/notebooks
+      - ../src:/evaluation/src
+    environment:
+      NVIDIA_VISIBLE_DEVICES: 0
+      CUDA_VISIBLE_DEVICES: 0
+    ulimits:
+      memlock: -1
+    shm_size: '16gb'
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [ gpu ]                                                                                                                                                                                               
